@@ -1,27 +1,26 @@
-import express, { Application } from "express";
-import cors, { CorsOptions } from "cors";
+import express, {Application} from "express";
+import cors from "cors";
 import Routes from "./routes";
+import morgan from "morgan"
 import Database from "./db";
+import options from "./middleware/cors";
 
 export default class Server {
-  constructor(app: Application) {
-    this.config(app);
-    this.syncDatabase();
-    new Routes(app);
-  }
+    constructor(app: Application) {
+        this.config(app);
+        this.syncDatabase();
+        new Routes(app);
+    }
 
-  private config(app: Application): void {
-    const corsOptions: CorsOptions = {
-      origin: "http://localhost:8081"
-    };
+    private config(app: Application): void {
+        app.use(cors(options));
+        app.use(express.json());
+        app.use(express.urlencoded({extended: true}));
+        app.use(morgan("common"));
+    }
 
-    app.use(cors(corsOptions));
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-  }
-
-  private syncDatabase(): void {
-    const db = new Database();
-    db.sequelize?.sync();
-  }
+    private syncDatabase(): void {
+        const db = new Database();
+        db.sequelize?.sync();
+    }
 }

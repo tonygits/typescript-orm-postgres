@@ -54,9 +54,8 @@ class TutorialRepository implements ITutorialRepository {
     const { id, title, description, published } = tutorial;
 
     try {
-      const affectedRows = await Tutorial.update(
-        { title, description, published },
-        { where: { id: id } }
+      const affectedRows = await Tutorial.update({ title, description, published },
+          { where: { id: id } }
       );
 
       return affectedRows[0];
