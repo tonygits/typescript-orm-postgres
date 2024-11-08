@@ -34,7 +34,7 @@ describe("POST /users/register", () => {
       username: "test12"
     });
 
-    console.log(response.status)
+    console.log("register response status", response.status);
     expect(response.status).toBe(201);
     expect(response.body.email).toEqual("test@gmail.com");
   });
@@ -50,6 +50,7 @@ describe("POST /users/login", () => {
       password: "testpassword",
     });
 
+    console.log("login response status", response.status);
     expect(response.status).toBe(200);
     expect(response.body.username).toEqual(user.username);
   });
@@ -75,9 +76,11 @@ describe("GET /users/:id/profile", () => {
       .get(`/api/users/${userId}/profile`)
       .set("Authorization", `Bearer ${token}`);
 
+    console.log("get user profile response status", response.status);
     expect(response.status).toBe(200);
     expect(response.body.id).toEqual(user.id);
     expect(response.body.email).toEqual(user.email);
+    expect(response.body.username).toEqual(user.username);
   });
 });
 

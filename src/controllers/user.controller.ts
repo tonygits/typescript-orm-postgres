@@ -1,13 +1,14 @@
 import {Request, Response} from "express";
 import User from "../models/user.model";
 import bcrypt from "bcrypt";
+import HttpStatus from "http-status"
 import jwt, {Secret} from "jsonwebtoken";
 import userRepository from "../repositories/user.repository";
 
 export default class UserController {
     async registerUser(req: Request, res: Response) {
         if (!req.body.email || !req.body.username || !req.body.password) {
-            res.status(400).send({
+            res.status(HttpStatus.BAD_REQUEST).send({
                 message: "Content can not be empty!"
             });
             return;
@@ -18,14 +19,14 @@ export default class UserController {
             let userExists = await userRepository.findByEmail(email);
             if (userExists) {
                 return res
-                    .status(400)
+                    .status(HttpStatus.BAD_REQUEST)
                     .json({error: "User with this email already exists"});
             }
 
             userExists = await userRepository.findByUsername(username);
             if (userExists) {
                 return res
-                    .status(400)
+                    .status(HttpStatus.BAD_REQUEST)
                     .json({error: "User with this username already exists"});
             }
 
@@ -40,7 +41,7 @@ export default class UserController {
 
             const savedUser = await userRepository.save(user);
 
-            res.status(201).send({
+            res.status(HttpStatus.CREATED).send({
                 id: savedUser.id,
                 email: savedUser.email,
                 username: savedUser.username,
@@ -48,7 +49,7 @@ export default class UserController {
                 updatedAt: savedUser.updatedAt,
             });
         } catch (err) {
-            res.status(500).send({
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
                 error: "Some error occurred while retrieving Users."
             });
         }
@@ -60,7 +61,7 @@ export default class UserController {
 
         try {
             const users = await userRepository.filterAll({username: username, email: email});
-            let userArr: any[]= [];
+            let userArr: any[] = [];
             users.forEach((user) => {
                 userArr.push({
                     id: user.id,
@@ -71,9 +72,9 @@ export default class UserController {
                 });
             });
 
-            res.status(200).send(userArr);
+            res.status(HttpStatus.OK).send(userArr);
         } catch (err) {
-            res.status(500).send({
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
                 error: "Some error occurred while retrieving users."
             });
         }
@@ -84,7 +85,7 @@ export default class UserController {
         try {
             const user = await userRepository.findByEmail(email);
             if (!user) {
-                return res.status(404).json({error: "Invalid email or password."});
+                return res.status(HttpStatus.NOT_FOUND).json({error: "Invalid email or password."});
             }
 
             const validPassword = await bcrypt.compare(
@@ -93,7 +94,7 @@ export default class UserController {
             );
 
             if (!validPassword) {
-                return res.status(401).json({error: "Invalid email or password."});
+                return res.status(HttpStatus.UNAUTHORIZED).json({error: "Invalid email or password."});
             }
 
             const token = jwt.sign({userId: user.dataValues.id}, (process.env.JWT_SECRET as Secret), {
@@ -101,7 +102,7 @@ export default class UserController {
             });
             res.setHeader('Content-Type', 'application/json')
             res.setHeader('token', token)
-            if (user) res.status(200).send({
+            if (user) res.status(HttpStatus.OK).send({
                 id: user.id,
                 email: user.email,
                 username: user.username,
@@ -109,7 +110,7 @@ export default class UserController {
                 updatedAt: user.updatedAt,
             });
         } catch (err) {
-            res.status(500).send({
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
                 message: `Error retrieving user with id=${email}.`
             });
         }
@@ -119,7 +120,7 @@ export default class UserController {
         const id: number = parseInt(req.params.id);
         try {
             const user = await userRepository.findByID(id);
-            if (user) res.status(200).send({
+            if (user) res.status(HttpStatus.OK).send({
                 id: user.id,
                 email: user.email,
                 username: user.username,
@@ -127,11 +128,11 @@ export default class UserController {
                 updatedAt: user.updatedAt,
             });
             else
-                res.status(404).send({
+                res.status(HttpStatus.NOT_FOUND).send({
                     message: `Cannot find user with id=${id}.`
                 });
         } catch (err) {
-            res.status(500).send({
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
                 message: `Error retrieving user with id=${id}.`
             });
         }
@@ -143,19 +144,19 @@ export default class UserController {
         try {
             let user = await userRepository.findByID(id);
             if (!user) {
-                return res.status(404).json({error: `user with ${id} not found`});
+                return res.status(HttpStatus.NOT_FOUND).json({error: `user with ${id} not found`});
             }
 
             user.username = username
             user.email = email
             const num = await userRepository.update(user);
             if (num == 0) {
-                return res.status(400).json({error: "failed to update user"});
+                return res.status(HttpStatus.BAD_REQUEST).json({error: "failed to update user"});
             }
             //get  the update user
             user = await userRepository.findByID(id);
             if (user) {
-                res.status(200).send({
+                res.status(HttpStatus.OK).send({
                     id: user?.id,
                     email: user?.email,
                     username: user?.username,
@@ -168,7 +169,7 @@ export default class UserController {
                 });
             }
         } catch (err) {
-            res.status(500).send({
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
                 message: `Error updating User with id=${id}.`
             });
         }
@@ -179,7 +180,7 @@ export default class UserController {
         try {
             let user = await userRepository.findByID(id);
             if (!user) {
-                return res.status(404).json({error: `user with ${id} not found`});
+                return res.status(HttpStatus.NOT_FOUND).json({error: `user with ${id} not found`});
             }
 
             const num = await userRepository.delete(id);
@@ -193,7 +194,7 @@ export default class UserController {
                 });
             }
         } catch (err) {
-            res.status(500).send({
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
                 message: `Could not delete User with id==${id}.`
             });
         }
