@@ -1,15 +1,15 @@
-FROM node:18.15.0-alpine
+FROM node:22-alpine3.19
 
 WORKDIR /usr/src/app
 
-COPY package*.json yarn.lock .swcrc ./
+COPY package.json package-lock.json .swcrc tsconfig.json ./
 
-RUN yarn install
+RUN npm install
 
 COPY . .
 
-RUN yarn run build
+RUN npm run build
 
 EXPOSE 8080
 
-CMD [ "yarn", "run", "start" ]
+CMD ["npm", "run", "start"]

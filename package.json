@@ -9,7 +9,7 @@
     "test": "jest --watchAll --no-cache --detectOpenHandles",
     "watch-compile": "swc src -w --out-dir dist",
     "watch-dev": "tsc -w & nodemon --watch \"dist/**/*\"  -e js ./dist/server.js",
-    "start": "tsc -w & node dist/server.js"
+    "start": "tsc && node ./dist/server.js"
   },
   "keywords": [
     "nodejs",

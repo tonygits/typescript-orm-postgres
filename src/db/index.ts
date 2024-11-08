@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 const dialect = "postgres";
 
 if (process.env.NODE_ENV == "test") {
-    dotenv.config({ path: path.resolve(__dirname, "../../.env.test") });
+    dotenv.config({path: path.resolve(__dirname, "../../.env.test")});
 }
 
 class Database {
@@ -19,13 +19,9 @@ class Database {
 
     private async connectToDatabase() {
         console.log("database", process.env.DB_NAME)
-        this.sequelize = new Sequelize({
-            database: process.env.DB_NAME,
-            username: process.env.DB_USERNAME,
-            password: process.env.DB_PASSWORD,
-            host: process.env.DB_HOST,
+        const conString = `${dialect}://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:5432/${process.env.DB_NAME}`;
+        this.sequelize = new Sequelize(conString, {
             port: parseInt(String(process.env.DB_PORT)),
-            dialect: dialect,
             pool: {
                 max: 5,
                 min: 0,
